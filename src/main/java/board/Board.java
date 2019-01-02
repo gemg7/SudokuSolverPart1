@@ -11,6 +11,10 @@ import java.util.List;
 public class Board {
     private final List<List<Integer>> board;
 
+    public Board() {
+        this.board = new ArrayList<>();
+    }
+
     public Board(String filePath) throws IOException {
         BoardReader reader = BoardReaderFactory.getReader(filePath);
         this.board = reader.parseBoard(filePath);
@@ -50,6 +54,31 @@ public class Board {
         return boardString.toString();
     }
 
+    private void setCell(Integer row, Integer column, Integer value) {
+        this.board.get(row).set(column, value);
+    }
+
+    public ArrayList<Board> getNeighbors() {
+        ArrayList<Board> neighbors = new ArrayList<>();
+
+        for (int i = 0; i < this.getBoard().size(); i++) {
+            for (int j = 0; j < this.getBoard().get(i).size(); j++) {
+                if (this.getBoard().get(i).get(j) == null) {
+                    for (int k = 1; k <= 9; k++) {
+                        Board neighbor = new Board(this.getBoard());
+                        neighbor.setCell(i, j, k);
+
+                        if (neighbor.isValid()) {
+                            neighbors.add(neighbor);
+                        }
+                    }
+                }
+            }
+        }
+
+        return neighbors;
+    }
+
     private int getNumBlanks() {
         int blanks = 0;
         for (List<Integer> row : this.board) {
@@ -73,7 +102,6 @@ public class Board {
             for (int j = 0; j < this.board.get(i).size(); j++) {
                 Integer value = this.board.get(i).get(j);
                 if (rowConstraint.contains(value)) {
-                    System.out.println("Row failure i:" + i + " j:" + j);
                     return false;
                 }
 
@@ -83,7 +111,6 @@ public class Board {
 
                 value = this.board.get(j).get(i);
                 if (colConstraint.contains(value)) {
-                    System.out.println("Column failure i:" + i + " j:" + j);
                     return false;
                 }
 
@@ -103,7 +130,6 @@ public class Board {
                     for (int l = 0; l < 3; l++) {
                         Integer value = this.board.get(i + k).get(j + l);
                         if (gridConstraint.contains(value)) {
-                            System.out.println("Grid constraint failure i:" + i + " j:" + j + " k:" + k + " l:" + l);
                             return false;
                         }
                         if (value != null) {
@@ -119,7 +145,7 @@ public class Board {
         return true;
     }
 
-    boolean isSolved() {
+    public boolean isSolved() {
         return isValid() && getNumBlanks() == 0;
     }
 }
